@@ -151,6 +151,7 @@ namespace Katas.Pump.Test
         [Fact]
         public void GivenMultipleInRangeMeasureWithOutsiders_WhenAllPossibleCombinations_ReturnsFullUsageTime()
         {
+            var beforeRangeMeasure = new Measure(_start.AddHours(-1), false);
             var inRangeOnMeasure1 = new Measure(_start.AddHours(1), true);
             var inRangeOffMeasure1 = new Measure(inRangeOnMeasure1.Time.AddHours(1), false);
             var inRangeOnMeasure2 = new Measure(inRangeOnMeasure1.Time.AddHours(2), true);
@@ -159,11 +160,51 @@ namespace Katas.Pump.Test
             var inRangeOffMeasure3 = new Measure(inRangeOnMeasure1.Time.AddHours(5), false);
             var inRangeOnMeasure4 = new Measure(inRangeOnMeasure1.Time.AddHours(6), true);
             var inRangeOnMeasure5 = new Measure(inRangeOnMeasure1.Time.AddHours(7), true);
+            var afterRangeMeasure = new Measure(_end.AddHours(1), true);
             TimeSpan expectedUsageTime = (inRangeOffMeasure1.Time - inRangeOnMeasure1.Time)
                 + (inRangeOffMeasure2.Time - inRangeOnMeasure2.Time)
                 + (_end - inRangeOnMeasure4.Time);
-            var twoMeasuresArray = new Measure[8]
+            var twoMeasuresArray = new Measure[10]
             {
+                beforeRangeMeasure,
+                afterRangeMeasure,
+                inRangeOnMeasure1,
+                inRangeOffMeasure1,
+                inRangeOnMeasure2,
+                inRangeOnMeasure3,
+                inRangeOffMeasure2,
+                inRangeOffMeasure3,
+                inRangeOnMeasure4,
+                inRangeOnMeasure5
+            };
+
+            TimeSpan actualUsageTime = _manager.GetPumpUsageByDateTimeRange(twoMeasuresArray, _start, _end);
+
+            Assert.Equal(expectedUsageTime, actualUsageTime);
+        }
+
+        [Fact]
+        public void GivenMultipleInRangeMeasureWithOutsiders_WhenAllPossibleCombinations2_ReturnsFullUsageTime()
+        {
+            var beforeRangeMeasure = new Measure(_start.AddHours(-1), true);
+            var inRangeOnMeasure1 = new Measure(_start.AddHours(1), false);
+            var inRangeOffMeasure1 = new Measure(inRangeOnMeasure1.Time.AddHours(1), false);
+            var inRangeOnMeasure2 = new Measure(inRangeOnMeasure1.Time.AddHours(2), true);
+            var inRangeOnMeasure3 = new Measure(inRangeOnMeasure1.Time.AddHours(3), true);
+            var inRangeOffMeasure2 = new Measure(inRangeOnMeasure1.Time.AddHours(4), false);
+            var inRangeOffMeasure3 = new Measure(inRangeOnMeasure1.Time.AddHours(5), false);
+            var inRangeOnMeasure4 = new Measure(inRangeOnMeasure1.Time.AddHours(6), true);
+            var inRangeOnMeasure5 = new Measure(inRangeOnMeasure1.Time.AddHours(7), true);
+            var afterRangeMeasure = new Measure(_end.AddHours(1), true);
+            TimeSpan expectedUsageTime = (inRangeOnMeasure1.Time - _start)
+                + (inRangeOnMeasure3.Time - inRangeOnMeasure2.Time)
+                + (inRangeOffMeasure2.Time - inRangeOnMeasure3.Time)
+                + (inRangeOnMeasure5.Time - inRangeOnMeasure4.Time)
+                + (_end - inRangeOnMeasure5.Time);
+            var twoMeasuresArray = new Measure[10]
+            {
+                beforeRangeMeasure,
+                afterRangeMeasure,
                 inRangeOnMeasure1,
                 inRangeOffMeasure1,
                 inRangeOnMeasure2,

@@ -14,18 +14,41 @@
             TimeSpan totalUsageTime = TimeSpan.Zero;
             Measure lastMeasure = null!;
             QuickSort(measures, 0, measures.Length - 1);
-            DisplayTimes(measures);
             for(int i = 0; i < measures.Length && measures[i].Time < end; ++i)
             {
                 Measure measure = measures[i];
                 if (measure.IsBetween(start, end))
                 {
-                    totalUsageTime += GetNextUsageTimeToAdd(measure.Time, lastMeasure);
+                    totalUsageTime += GetUsageTimeFromAnteriorOpenPump(measures, start, i, measure);
+                    totalUsageTime += GetNextUsageTime(measure.Time, lastMeasure);
                     lastMeasure = measure;
                 }
             }
-            totalUsageTime += GetNextUsageTimeToAdd(end, lastMeasure);
+            totalUsageTime += GetNextUsageTime(end, lastMeasure);
             return totalUsageTime;
+        }
+
+        /// <summary>
+        /// If an anterior "on" measure exists (i.e : a measure which was taken
+        /// strictly before the <paramref name="start"/> time, with a status describing
+        /// an open pump) and if this anterior measure strictly precedes the current 
+        /// <paramref name="measure"/>, returns the elapsed time from the <paramref name="start"/>
+        /// to the current <paramref name="measure"/>, else returns <see cref="TimeSpan.Zero"/>.
+        /// </summary>
+        /// <param name="sortedMeasures">Measures sorted by <see cref="Measure.Time"/> in ascending order</param>
+        /// <param name="start">Start time</param>
+        /// <param name="i">Current index in <paramref name="sortedMeasures"/> array</param>
+        /// <param name="measure">Current measure</param>
+        /// <returns></returns>
+        private TimeSpan GetUsageTimeFromAnteriorOpenPump(Measure[] sortedMeasures, DateTime start, int i, Measure measure)
+        {
+            if (i > 0)
+            {
+                Measure previousMeasure = sortedMeasures[i - 1];
+                if (previousMeasure.IsAnteriorOpenPump(start))
+                    return GetNextUsageTime(measure.Time, new Measure(start, true));
+            }
+            return TimeSpan.Zero;
         }
 
         /// <summary>
@@ -83,6 +106,21 @@
         }
 
         /// <summary>
+        /// Returns the next time span to add to the current total pump usage time.
+        /// This method expects a <paramref name="measureTime"/> between the configured
+        /// lower and upper bounds (both included).
+        /// </summary>
+        /// <param name="measureTime">Current measure</param>
+        /// <param name="lastMeasure">Previous measure</param>
+        /// <returns></returns>
+        private TimeSpan GetNextUsageTime(DateTime measureTime, Measure lastMeasure)
+        {
+            return lastMeasure != null && lastMeasure.IsOn
+                ? (measureTime - lastMeasure.Time)
+                : TimeSpan.Zero;
+        }
+
+        /// <summary>
         /// Displays the formatted times of the provided measures array.
         /// </summary>
         /// <param name="measures">The provided measures array</param>
@@ -96,13 +134,6 @@
                     Console.Write(", ");
             }
             Console.WriteLine("]");
-        }
-
-        private TimeSpan GetNextUsageTimeToAdd(DateTime measureTime, Measure lastMeasure)
-        {
-            return lastMeasure != null && lastMeasure.IsOn
-                ? (measureTime - lastMeasure.Time)
-                : TimeSpan.Zero;
         }
     }
 }

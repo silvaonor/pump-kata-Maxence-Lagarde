@@ -38,5 +38,14 @@
         /// <returns></returns>
         public bool IsBetween(DateTime start, DateTime end)
             => Time >= start && Time <= end;
+
+        /// <summary>
+        /// Determines if the measure describes a pump which was open before the
+        /// provided <paramref name="start"/> time.
+        /// </summary>
+        /// <param name="start">Higher bound against which the current time will be compared</param>
+        /// <returns></returns>
+        public bool IsAnteriorOpenPump(DateTime start)
+            => Time < start && IsOn;
     }
 }
