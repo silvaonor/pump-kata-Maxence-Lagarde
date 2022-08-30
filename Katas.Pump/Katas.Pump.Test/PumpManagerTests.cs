@@ -5,7 +5,7 @@ namespace Katas.Pump.Test
 {
     public class PumpManagerTests
     {
-        private static readonly PumpManager _manager = new PumpManager();
+        private static readonly MyNewPumpManager _manager = new MyNewPumpManager();
 
         private static readonly DateTime _start = new DateTime(2022, 1, 20, 6, 0, 0);
 
@@ -49,9 +49,9 @@ namespace Katas.Pump.Test
         }
 
         [Fact]
-        public void GivenSingleOutOfRangeMeasure_WhenOn_ReturnsZeroUsageTime()
+        public void GivenSingleOutOfRangeMeasure_WhenOn_ReturnsUntilEndUsageTime()
         {
-            TimeSpan expectedUsageTime = TimeSpan.Zero;
+            TimeSpan expectedUsageTime = _end - _start;
             var outOfRangeTime = new DateTime(_start.Year, _start.Month, _start.Day, _start.Hour - 1, _start.Minute, _start.Second);
             var outOfRangeMeasure = new Measure(outOfRangeTime, true);
             var singleMeasureArray = new Measure[1] { outOfRangeMeasure };
