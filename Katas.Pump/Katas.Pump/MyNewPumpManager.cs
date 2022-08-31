@@ -11,7 +11,7 @@
         public TimeSpan GetPumpUsageByDateTimeRange(Measure[] measures, DateTime start, DateTime end)
         {
             var sortedMeasures = measures.OrderBy(m => m.Time).ToList();
-            if (!sortedMeasures.Any()                    //no data
+            if (!sortedMeasures.Any()                   //no data
                 || end <= start                         //inconsistent data
                 || sortedMeasures.First().Time > start) //provided range starts before data (unprocessable)
                 return TimeSpan.Zero;
@@ -20,7 +20,7 @@
             var lastIndexInRange = sortedMeasures.FindLastIndex(m => m.Time < end);
             if (firstIndexInRange == -1)
             {
-                return sortedMeasures[lastIndexInRange].IsOn ? end - start : TimeSpan.Zero; //provided range starts after data
+                return sortedMeasures[lastIndexInRange].IsOn ? end - start : TimeSpan.Zero; //provided range starts after data (weird but theorically processable)
             }
             var totalUsageTime = GetTotalUsageTimesBeetweenIndexes(sortedMeasures, firstIndexInRange, lastIndexInRange);
 
@@ -47,6 +47,5 @@
         /// <returns> An enumerable of <see cref="TimeSpan"/> shorter than sortedMeasure by 1. Zero if the pump was off, the time beetween two measures if the pump was on </returns>
         public IEnumerable<TimeSpan> GetUsageTimesBeetweenMeasures(IEnumerable<Measure> sortedMeasure)
             => sortedMeasure.Zip(sortedMeasure.Skip(1), (first, second) => first.IsOn ? second.Time - first.Time : TimeSpan.Zero);
-
     }
 }
